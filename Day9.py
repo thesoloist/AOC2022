@@ -1,65 +1,56 @@
 import re
 
-glbl_hx = 0
-glbl_hy = 0
-glbl_tx = 0
-glbl_ty = 0
+knot_cnt = 10
+knot_x = [0 for i in range(knot_cnt)]
+knot_y = [0 for i in range(knot_cnt)]
 
-def move_h(dir, amt, head_t, tail_t):
-    print("Moving head to {} for {}".format(dir, amt))
-    my_hx = head_t[0]
-    my_hy = head_t[1]
-    my_tx = tail_t[0]
-    my_ty = tail_t[1]
+def chain_move_h(dir, amt, x_arr, y_arr):
+    chain_len = len(x_arr)
+    print("Moving chain head to {} for {}, chain length {}".format(dir, amt, chain_len))
     for a in range(amt):
         if(dir=="R"):
-            my_hx += 1
+            x_arr[0] += 1
         elif(dir=="L"):
-            my_hx -= 1
+            x_arr[0] -= 1
         elif(dir=="U"):
-             my_hy += 1
+            y_arr[0] += 1
         elif(dir=="D"):
-            my_hy -= 1
-        # now move T based on new H
-        
-        my_tx, my_ty = move_mark_t(my_hx, my_hy, my_tx, my_ty)
-        print("After move: head x/y = {}/{}, tail x/y={}/{}".format(my_hx, my_hy, my_tx, my_ty)) 
-    return (my_hx, my_hy), (my_tx, my_ty)
+            y_arr[0] -= 1
+        for i in range(len(x_arr) - 1):
+            chain_move_t(i, x_arr, y_arr)
+        print("After move, last knot is at x/y={}/{}".format(x_arr[-1], y_arr[-1]))
+        if((knot_x[-1], knot_y[-1]) not in t_trail):
+            t_trail.append((knot_x[-1], knot_y[-1]))
 
-def move_mark_t(hx, hy, tx, ty):
-    print("Moving tail x/y={}/{} towards head x/y {}/{}".format(tx,ty,hx,hy))
-    #check if need to move at all
-    if((abs(hx-tx) <= 1) and (abs(hy-ty) <= 1)):
+def chain_move_t(iter, x_arr, y_arr):
+    print("Moving knot {}".format(iter+1))
+    if((abs(x_arr[iter+1] - x_arr[iter])<=1) and (abs(y_arr[iter+1] - y_arr[iter])<=1)):
         print("No need to move")
-        return tx, ty
+        return        
     else:
-        if((hx != tx) and (hy != ty)):            
+        if((x_arr[iter] != x_arr[iter+1]) and (y_arr[iter] != y_arr[iter+1])):            
             print("Need to move diagonally to catch up!")
-            if(hx>tx):
-                tx += 1
+            if(x_arr[iter]>x_arr[iter+1]):
+                x_arr[iter+1] += 1
             else:
-                tx -= 1
-            if(hy > ty):
-                ty += 1
+                x_arr[iter+1] -= 1
+            if(y_arr[iter] > y_arr[iter+1]):
+                y_arr[iter+1] += 1
             else:
-                ty -= 1
-        elif(abs(hx-tx) == 2): # move horiz
+                y_arr[iter+1] -= 1
+        elif(abs(x_arr[iter]-x_arr[iter+1]) == 2): # move horiz
             print("Need to move horiz to catch up!")
-            if(hx>tx):
-                tx += 1
+            if(x_arr[iter]>x_arr[iter+1]):
+                x_arr[iter+1] += 1
             else:
-                tx -= 1
-        elif(abs(hy-ty) == 2): #move vert
+                x_arr[iter+1] -= 1
+        elif(abs(y_arr[iter]-y_arr[iter+1]) == 2): #move vert
             print("Need to move vert to catch up!")
-            if(hy > ty):
-                ty += 1
+            if(y_arr[iter] > y_arr[iter+1]):
+                y_arr[iter+1] += 1
             else:
-                ty -= 1
-        print("new tail at x/y {}/{}".format(tx,ty))
-        # log new position
-        if((tx,ty) not in t_trail):
-            t_trail.append((tx,ty))
-        return tx, ty    
+                y_arr[iter+1] -= 1
+        print("new knot {} at x/y {}/{}".format(iter+1,x_arr[iter+1],y_arr[iter+1]))
 
 moves = []
 with open("day9_input.txt") as f:
@@ -73,7 +64,7 @@ with open("day9_input.txt") as f:
 print(moves)
 
 t_trail = [(0,0)]
-for m in moves:
-    (glbl_hx, glbl_hy), (glbl_tx, glbl_ty) = move_h(m[0], m[1], (glbl_hx, glbl_hy), (glbl_tx, glbl_ty))
-    print("After line: head x/y = {}/{}, tail x/y={}/{}".format(glbl_hx, glbl_hy, glbl_tx, glbl_ty))
-    print("Tail went through {} points".format(len(t_trail)))
+for m in moves:    
+    chain_move_h(m[0], m[1], knot_x, knot_y)
+    print("After line: head x/y = {}/{}, tail x/y={}/{}".format(knot_x[0], knot_y[0], knot_x[-1], knot_y[-1]))    
+print("Tail went through {} points".format(len(t_trail)))
