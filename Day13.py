@@ -60,8 +60,7 @@ def compare_list(left, right):
     if(len(left) == len(right)):
         return None
     else:
-        return (len(left) < len(right))
-    
+        return (len(left) < len(right))   
 
 def part1(input_arr):    
     idx = 1
@@ -79,6 +78,44 @@ def part1(input_arr):
         idx += 1                
     print("Sum of valid pair indexes = ", idx_sum)
 
+def get_first_item(lst):    
+    if len(lst)==0:
+        return '-1'
+    else:       
+        if type(lst[0])==list:
+            return get_first_item(lst[0])
+        else:
+            return str(lst[0])    
+
+def part2(input_arr):
+    first_dict = {}
+    for i in input_arr:
+        first = get_first_item(i)
+        print("getting first item from {} -> {}".format(i, first))
+        if first in first_dict.keys():
+            first_dict[first].append(i)
+        else:
+            first_dict[first] = [i]
+        print(first_dict[first])
+    fd_keys = [int(x) for x in first_dict.keys()]
+    fd_keys.sort()
+    print(fd_keys)
+    idx = 1
+    tgt = [2,6]
+    idx_prd = 1
+    for k in fd_keys:
+        if k in tgt:
+            idx_prd *= idx        
+        idx += len(first_dict[str(k)])
+        print("After fd key {}, idx now at {}, idx_prd at {}".format(k, idx, idx_prd))
+    #print("index 2/6 = {}/{}".format(div2_idx, div6_idx))
+    return idx_prd
+
 arr = parse_input("day13_input.txt")
-print(arr)
-part1(arr)
+#[print(a) for a in arr]
+#part1(arr)
+div_arr = arr + [[[2]]] + [[[6]]]
+[print(a) for a in div_arr]
+result = part2(div_arr)
+print("div index product = ", result)
+
