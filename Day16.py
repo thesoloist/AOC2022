@@ -99,36 +99,47 @@ def build_djikstra_map(valve_map):
         prev, distances = djikstra(valve_map, v.n)
         for d in valve_map:
             djikstra_map[v.n][d.n] = distances[d.n]
-        
+    
 
 cur_val = "AA"
 time_limit = 30
 
 djikstra_map = {} #key = src, value = dict(key=dst, val=dist)
 possible_routes = []
+
 def build_possible_routes(time_limit, v_map, cur_val, route):    
     # try going for each and see what can we do until time runs out
     print("Looking for best next move with time left = {}, cur_val = {}, path = {}".format(time_limit, cur_val, route))
     if not get_closed_valves(v_map):
         print("No more closed valves! path = {}".format(route))
         possible_routes.append(route) if route not in possible_routes else None
-    push_this = True
-    for cv in get_closed_valves(v_map):        
-        time_cost = djikstra_map[cur_val][cv] + 1 #add one for opening
-        print("Shortest path cost to {} from {} = {}".format(cv, cur_val, time_cost))        
-        if(time_cost > time_limit):
-            print("not enough time(need {} against {}) to open {} from {}".format(time_cost, time_limit, cv, cur_val))
-            # possible_routes.append(route) if route not in possible_routes else None           
-        else:            
-            #print("Opened valve {}, Trying further...".format(cv))
-            new_map = copy_map(v_map)
-            get_valve(cv, new_map).v = True
-            if(time_limit - time_cost > 2): # need at least 1m to move and 1m to open
-                build_possible_routes((time_limit - time_cost), new_map, cv, str.format("{}{}-", route, cv))
-                push_this = False
-    if(push_this):
-        print("pushing ",route)
-        possible_routes.append(route) if route not in possible_routes else None
+    else:
+        for cv in get_closed_valves(v_map):        
+            time_cost = djikstra_map[cur_val][cv] + 1 #add one for opening
+            print("Shortest path cost to {} from {} = {}".format(cv, cur_val, time_cost))
+            pushed = False
+            if(time_cost > time_limit):
+                print("not enough time(need {} against {}) to open {} from {}".format(time_cost, time_limit, cv, cur_val))
+                if not pushed:                    
+                    if route not in possible_routes:
+                        print("Pusing route ", route) 
+                        possible_routes.append(route) 
+                        pushed = True
+            else:            
+                #print("Opened valve {}, Trying further...".format(cv))
+                new_map = copy_map(v_map)
+                get_valve(cv, new_map).v = True
+                if(time_limit - time_cost > 2): # need at least 1m to move and 1m to open
+                    build_possible_routes((time_limit - time_cost), new_map, cv, str.format("{}{}-", route, cv))
+                else: #don't bother trying, push here                    
+                    nr = str.format("{}{}-", route, cv)
+                    if nr not in possible_routes:
+                        print("Pusing last step here:", nr)
+                        possible_routes.append(nr) 
+                        pushed = True
+                        
+
+ 
         
        
     
