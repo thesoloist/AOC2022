@@ -39,7 +39,7 @@ for c in cube_dict.keys():
 
 print(sum_faces)
 
-# pt 2 - WIP
+# pt 2
 # build space with cubes in, and fill from all space on surface(min-max XYZ).
 # then check if there's any unfilled space. exclude any face touching the unfilled space
 
